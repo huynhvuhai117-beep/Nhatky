@@ -210,25 +210,53 @@ var scriptUrl = localStorage.getItem('nkScriptUrl') || localStorage.getItem('she
 var allRows   = [];
 
 // Chuẩn hoá dữ liệu: tự detect format cũ/mới, trả về object nhất quán
+// Chuẩn hoá ngày từ Sheet — tránh lệch UTC
+function parseSheetDate(val) {
+  if (!val) return '';
+  var s = String(val);
+  // Dạng ISO có timestamp: 2026-04-19T17:00:00.000Z → lấy phần date thôi, +1 ngày nếu giờ >= 17
+  var isoMatch = s.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):/);
+  if (isoMatch) {
+    var y=isoMatch[1], m=isoMatch[2], d=parseInt(isoMatch[3]), h=parseInt(isoMatch[4]);
+    // Nếu giờ UTC >= 17 thì VN (+7) là ngày hôm sau
+    if (h >= 17) { var dt=new Date(y+'-'+m+'-'+isoMatch[3]); dt.setDate(dt.getDate()+1); return dt.toISOString().split('T')[0]; }
+    return y+'-'+m+'-'+isoMatch[3];
+  }
+  // Dạng yyyy-mm-dd thuần
+  if (s.match(/^\d{4}-\d{2}-\d{2}$/)) return s;
+  // Dạng dd/mm/yyyy
+  var dmyMatch = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (dmyMatch) return dmyMatch[3]+'-'+dmyMatch[2].padStart(2,'0')+'-'+dmyMatch[1].padStart(2,'0');
+  return s;
+}
+
+// Format hiển thị dd/mm/yyyy
+function fmtDate(isoStr) {
+  if (!isoStr) return '';
+  var p = isoStr.split('-');
+  if (p.length === 3) return p[2]+'/'+p[1]+'/'+p[0];
+  return isoStr;
+}
+
 function normalizeRow(r) {
-  var isNew = r.length >= 15 && isNaN(Number(r[4])) && String(r[4]).match(/\d{4}-\d{2}-\d{2}/);
+  var isNew = r.length >= 15 && isNaN(Number(r[4])) && (String(r[4]).match(/\d{4}-\d{2}-\d{2}/) || String(r[4]).match(/T\d{2}:/));
   if (isNew) {
-    // Format mới: có cột Ngay vc ở index 4
     return {
       ngayTao: r[0], maDH: r[1], khach: r[2], khoBoc: r[3],
-      ngayVC:  r[4], chuyen: r[5], soXe: r[6], loaiXe: r[7],
+      ngayVC:  parseSheetDate(r[4]), ngayVCraw: r[4],
+      chuyen: r[5], soXe: r[6], loaiXe: r[7],
       tuyen: r[8], laiXe: r[9], sdt: r[10], cccd: r[11],
       diemGiao: r[12], gio: r[13], ghiChu: r[14], isNew: true
     };
   } else {
-    // Format cũ: không có Ngay vc — dùng ngày tạo làm fallback
     var ngayTaoStr = String(r[0]||'');
     var parts = ngayTaoStr.match(/(\d+)\/(\d+)\/(\d{4})/);
     var ngayVCfallback = '';
     if (parts) ngayVCfallback = parts[3]+'-'+parts[2].padStart(2,'0')+'-'+parts[1].padStart(2,'0');
     return {
       ngayTao: r[0], maDH: r[1], khach: r[2], khoBoc: r[3],
-      ngayVC:  ngayVCfallback, chuyen: r[4], soXe: r[5], loaiXe: r[6],
+      ngayVC: ngayVCfallback, ngayVCraw: '',
+      chuyen: r[4], soXe: r[5], loaiXe: r[6],
       tuyen: r[7], laiXe: r[8], sdt: r[9], cccd: r[10],
       diemGiao: r[11], gio: r[12], ghiChu: r[13], isNew: false
     };
@@ -239,9 +267,12 @@ var sortAsc   = false;
 
 // ── Init ──
 window.onload = function() {
-  var today = new Date().toISOString().split('T')[0];
-  document.getElementById('fTo').value   = today;
-  var ago30 = new Date(Date.now() - 30*864e5).toISOString().split('T')[0];
+  var _now = new Date();
+  var _pad = function(n){ return n<10?'0'+n:''+n; };
+  var today = _now.getFullYear()+'-'+_pad(_now.getMonth()+1)+'-'+_pad(_now.getDate());
+  document.getElementById('fTo').value = today;
+  var _ago = new Date(_now.getTime() - 30*864e5);
+  var ago30 = _ago.getFullYear()+'-'+_pad(_ago.getMonth()+1)+'-'+_pad(_ago.getDate());
   document.getElementById('fFrom').value = ago30;
 
   if (scriptUrl) {
@@ -385,7 +416,7 @@ function renderTable(rows) {
     html += '<td style="font-size:11px;color:var(--muted)">' + (r.ngayTao||'') + '</td>';
     html += '<td><strong>' + (r.khach||'') + '</strong></td>';
     html += '<td><span class="badge badge-blue">' + (r.khoBoc||'-') + '</span></td>';
-    html += '<td style="font-weight:600;color:var(--primary)">' + (r.ngayVC||'<span style="color:#ccc">—</span>') + '</td>';
+    html += '<td style="font-weight:600;color:var(--primary)">' + (r.ngayVC ? fmtDate(r.ngayVC) : '<span style="color:#ccc">—</span>') + '</td>';
     html += '<td style="text-align:center"><span class="badge badge-green">' + (r.chuyen||'') + '</span></td>';
     html += '<td><strong style="color:var(--primary)">' + (r.soXe||'') + '</strong>' + (r.loaiXe ? ' <span style="color:var(--muted);font-size:11px">(' + r.loaiXe + ')</span>' : '') + '</td>';
     html += '<td>' + (r.tuyen||'') + '</td>';
@@ -403,7 +434,8 @@ function renderTable(rows) {
 // ── Stats ──
 function updateStats() {
   var today = new Date().toLocaleDateString('vi-VN');
-  var today2 = new Date().toISOString().split('T')[0];
+  var _n2 = new Date(); var _p2 = function(n){return n<10?'0'+n:''+n;};
+  var today2 = _n2.getFullYear()+'-'+_p2(_n2.getMonth()+1)+'-'+_p2(_n2.getDate());
   var norm   = allRows.map(normalizeRow);
   var todayRows = norm.filter(function(r){ return r.ngayVC === today2; });
   var plates    = new Set(norm.map(function(r){return r.soXe||'';}));
