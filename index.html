@@ -3,411 +3,1143 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nhật Ký Điều Xe</title>
+<title>Quản Lý Đặt Xe</title>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --primary: #0f4c81; --primary-light: #1a6bb5;
-    --accent: #f59e0b; --success: #10b981; --danger: #ef4444;
-    --bg: #f0f4f8; --card: #fff; --text: #1e293b;
-    --muted: #64748b; --border: #e2e8f0;
+    --primary: #0f4c81;
+    --primary-light: #1a6bb5;
+    --accent: #f59e0b;
+    --success: #10b981;
+    --danger: #ef4444;
+    --bg: #f0f4f8;
+    --card: #fff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --trip-bg: #f8faff;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
+  /* HEADER */
   header { background: var(--primary); color: #fff; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(15,76,129,.3); }
-  .hdr-inner { max-width: 1200px; margin: 0 auto; padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-  .hdr-left { display: flex; align-items: center; gap: 10px; }
-  .hdr-title h1 { font-size: 16px; font-weight: 800; }
-  .hdr-title p { font-size: 11px; opacity: .7; margin-top: 1px; }
-  .btn-back { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); color: #fff; padding: 7px 13px; border-radius: 8px; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 5px; }
-  .btn-back:hover { background: rgba(255,255,255,.25); }
+  .header-inner { max-width: 800px; margin: 0 auto; padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .header-left { display: flex; align-items: center; gap: 10px; }
+  .header-title h1 { font-size: 16px; font-weight: 800; }
+  .header-title p { font-size: 11px; opacity: .7; margin-top: 1px; }
+  .btn-manage { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); color: #fff; padding: 7px 12px; border-radius: 8px; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
 
-  main { max-width: 1200px; margin: 0 auto; padding: 16px 13px 40px; }
+  /* MAIN */
+  main { max-width: 800px; margin: 0 auto; padding: 14px 13px 110px; }
+  .card { background: var(--card); border-radius: 16px; padding: 17px; margin-bottom: 13px; box-shadow: 0 1px 4px rgba(0,0,0,.06); border: 1px solid var(--border); }
 
-  /* SETUP CARD */
-  .setup-card { background: var(--card); border-radius: 14px; padding: 16px; margin-bottom: 14px; border: 1px solid var(--border); box-shadow: 0 1px 4px rgba(0,0,0,.06); }
-  .setup-card.hidden { display: none; }
-  .setup-row { display: flex; gap: 8px; margin-top: 8px; }
-  .setup-row input { flex: 1; padding: 9px 13px; border: 1.5px solid var(--border); border-radius: 9px; font-family: inherit; font-size: 13px; outline: none; }
-  .setup-row input:focus { border-color: var(--primary-light); }
+  .sec-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--primary); margin-bottom: 13px; display: flex; align-items: center; gap: 6px; }
+  .sec-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-  /* FILTER BAR */
-  .filter-bar { background: var(--card); border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; border: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
-  .filter-group { display: flex; flex-direction: column; gap: 4px; }
-  .filter-group label { font-size: 11px; font-weight: 600; color: var(--muted); }
-  .filter-group input, .filter-group select {
-    padding: 8px 11px; border: 1.5px solid var(--border); border-radius: 8px;
-    font-family: inherit; font-size: 13px; color: var(--text); background: #fff;
-    outline: none; min-width: 130px;
+  .fg { margin-bottom: 12px; }
+  .fg:last-child { margin-bottom: 0; }
+  .fg label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
+  .fg input, .fg textarea, .fg select {
+    width: 100%; padding: 10px 13px; border: 1.5px solid var(--border);
+    border-radius: 10px; font-family: inherit; font-size: 14px; color: var(--text);
+    background: #fff; outline: none; appearance: none; -webkit-appearance: none;
+    transition: border-color .2s;
   }
-  .filter-group input:focus, .filter-group select:focus { border-color: var(--primary-light); }
-  .btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 15px; border-radius: 9px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .2s; }
-  .btn-primary { background: var(--primary); color: #fff; }
-  .btn-primary:hover { background: var(--primary-light); }
+  .fg select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px;
+  }
+  .fg input:focus, .fg textarea:focus, .fg select:focus { border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(26,107,181,.1); }
+  .fg textarea { resize: vertical; min-height: 65px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* TRIP CARD */
+  .trips-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 13px; }
+  .trip-card { background: var(--trip-bg); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 11px; position: relative; }
+  .trip-card:focus-within { border-color: var(--primary-light); }
+  .trip-num { font-size: 11px; font-weight: 700; color: var(--primary); background: rgba(15,76,129,.1); padding: 3px 10px; border-radius: 20px; display: inline-block; margin-bottom: 12px; }
+  .trip-rm { position: absolute; top: 11px; right: 11px; width: 27px; height: 27px; border: none; background: rgba(239,68,68,.1); color: var(--danger); border-radius: 7px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+
+  /* DRIVER ROW — select + call button */
+  .driver-row { display: flex; gap: 8px; align-items: flex-end; }
+  .driver-row .fg { flex: 1; margin-bottom: 0; }
+  .btn-call { width: 44px; height: 44px; border: none; border-radius: 10px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .2s; text-decoration: none; }
+  .btn-call.active { background: var(--success); }
+  .btn-call.inactive { background: #f1f5f9; cursor: default; }
+
+  /* BUTTONS */
+  .btn { display: inline-flex; align-items: center; gap: 5px; padding: 9px 15px; border-radius: 10px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
   .btn-outline { background: #fff; border: 1.5px solid var(--primary); color: var(--primary); }
-  .btn-outline:hover { background: rgba(15,76,129,.05); }
-
-  /* STATS ROW */
-  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
-  .stat-card { background: var(--card); border-radius: 12px; padding: 14px 16px; border: 1px solid var(--border); text-align: center; }
-  .stat-num { font-size: 24px; font-weight: 800; color: var(--primary); }
-  .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; font-weight: 600; }
-
-  /* TABLE */
-  .table-wrap { background: var(--card); border-radius: 14px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
-  .table-head { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
-  .table-head h2 { font-size: 13px; font-weight: 700; color: var(--text); }
-  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
-  thead th { background: #f8faff; padding: 10px 13px; text-align: left; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; }
-  thead th:hover { color: var(--primary); }
-  thead th .sort-icon { opacity: .4; margin-left: 3px; }
-  thead th.active .sort-icon { opacity: 1; color: var(--primary); }
-  tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: #f8faff; }
-  tbody td { padding: 10px 13px; color: var(--text); vertical-align: middle; }
-  .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-  .badge-blue { background: rgba(15,76,129,.1); color: var(--primary); }
-  .badge-green { background: rgba(16,185,129,.1); color: var(--success); }
-
-  /* EMPTY / LOADING */
-  .empty-state { text-align: center; padding: 50px 20px; color: var(--muted); }
-  .empty-state .ico { font-size: 40px; margin-bottom: 12px; }
-  .empty-state p { font-size: 14px; line-height: 1.6; }
-  .loading { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
-  .spinner { display: inline-block; width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin .7s linear infinite; margin-bottom: 10px; }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-sm { padding: 7px 12px; font-size: 12px; }
+  .custom-box { display:none; margin-top:8px; background:#f0f9ff; border:1.5px solid #bae6fd; border-radius:10px; padding:11px 12px; }
+  .custom-box.show { display:block; }
+  .custom-box .fg { margin-bottom:8px; }
+  .custom-box .fg:last-child { margin-bottom:0; }
+  .custom-box .fg label { font-size:11px; color:var(--muted); }
+  .custom-box .row2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .btn-success { background: var(--success); color: #fff; }
+  .loading-spin { display:inline-block; animation: spin .8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* TOAST */
-  .toast { position: fixed; top: 14px; left: 50%; transform: translateX(-50%) translateY(-80px); background: #1e293b; color: #fff; padding: 10px 20px; border-radius: 50px; font-size: 13px; font-weight: 600; z-index: 999; transition: transform .3s; white-space: nowrap; max-width: 90vw; text-align: center; }
-  .toast.show { transform: translateX(-50%) translateY(0); }
+  /* BOTTOM */
+  .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid var(--border); padding: 10px 13px; z-index: 99; box-shadow: 0 -4px 16px rgba(0,0,0,.08); }
+  .bottom-inner { max-width: 800px; margin: 0 auto; display: flex; gap: 10px; }
+  .btn-send { flex: 1; padding: 13px; font-size: 15px; background: linear-gradient(135deg,#f59e0b,#ef6c00); color: #fff; border: none; border-radius: 12px; font-family: inherit; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; box-shadow: 0 4px 14px rgba(245,158,11,.35); }
+  .btn-sheet { padding: 13px 16px; background: var(--success); color: #fff; border: none; border-radius: 12px; font-family: inherit; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
 
+  /* MODAL */
+  .modal-ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; align-items: flex-end; justify-content: center; }
+  .modal-ov.show { display: flex; }
+  .modal { background: #fff; width: 100%; max-width: 800px; max-height: 94vh; border-radius: 22px 22px 0 0; overflow: hidden; display: flex; flex-direction: column; animation: slideUp .28s ease; }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal-hdr { padding: 14px 17px; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .modal-hdr h2 { font-size: 15px; font-weight: 700; }
+  .modal-x { width: 29px; height: 29px; border: none; background: rgba(255,255,255,.2); color: #fff; border-radius: 7px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .modal-body { flex: 1; overflow-y: auto; padding: 16px; -webkit-overflow-scrolling: touch; }
+  .modal-foot { padding: 11px 16px; border-top: 1px solid var(--border); display: flex; gap: 10px; flex-shrink: 0; background: #fff; }
+
+  /* MANAGE TABS */
+  .tabs { display: flex; gap: 0; background: var(--bg); border-radius: 10px; padding: 3px; margin-bottom: 15px; }
+  .tab { flex: 1; padding: 8px; text-align: center; font-size: 13px; font-weight: 600; border: none; background: none; border-radius: 8px; cursor: pointer; color: var(--muted); font-family: inherit; transition: all .2s; }
+  .tab.active { background: #fff; color: var(--primary); box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+
+  /* ADD FORM BOX */
+  .add-box { background: #f0f9ff; border: 1.5px solid #bae6fd; border-radius: 12px; padding: 14px; margin-bottom: 14px; }
+  .add-box h3 { font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 11px; }
+  .add-box .fg { margin-bottom: 9px; }
+  .add-box .fg input { background: #fff; }
+  .add-box .row2 { margin-bottom: 9px; }
+
+  /* LIST ITEMS */
+  .list-item { display: flex; align-items: center; gap: 10px; padding: 11px 13px; background: var(--trip-bg); border: 1.5px solid var(--border); border-radius: 11px; margin-bottom: 9px; }
+  .list-item-info { flex: 1; min-width: 0; }
+  .list-plate { font-size: 15px; font-weight: 800; color: var(--primary); letter-spacing: .4px; }
+  .list-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .list-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .btn-del { width: 31px; height: 31px; border: none; background: rgba(239,68,68,.1); color: var(--danger); border-radius: 8px; cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  /* PREVIEW */
+  .preview-box { background: #f8faff; border: 2px solid var(--primary); border-radius: 14px; overflow: hidden; font-size: 14px; line-height: 1.65; }
+  .preview-title { background: var(--primary); color: #fff; padding: 12px 16px; font-weight: 700; font-size: 15px; text-align: center; }
+  .preview-order { padding: 13px 15px; border-bottom: 1px solid var(--border); background: #fff; }
+  .prow { display: flex; gap: 6px; margin-bottom: 4px; font-size: 13px; }
+  .plbl { font-weight: 600; color: var(--muted); min-width: 100px; flex-shrink: 0; }
+  .preview-trip { padding: 13px 15px; border-bottom: 1px dashed var(--border); background: #fff; }
+  .preview-trip:last-of-type { border-bottom: none; }
+  .preview-trip-hd { font-weight: 700; color: var(--primary); font-size: 13px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .preview-trip-hd::after { content: ''; flex: 1; height: 1px; background: rgba(15,76,129,.15); }
+  .preview-foot { background: var(--primary); color: #fff; padding: 10px 15px; font-size: 12px; text-align: center; opacity: .9; }
+
+  /* EMPTY */
+  .empty { text-align: center; padding: 28px 16px; color: var(--muted); }
+  .empty .ico { font-size: 36px; margin-bottom: 8px; }
+  .empty p { font-size: 13px; }
+
+  /* SHEET SETUP */
   .sheet-status { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
   .sdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .sheet-status.ok .sdot { background: var(--success); }
   .sheet-status.ok .sdot { background: var(--success); }
   .sheet-status.ok { color: var(--success); }
   .sheet-status.no .sdot { background: #cbd5e1; }
   .sheet-status.no { color: var(--muted); }
   .sheet-status.loading .sdot { background: var(--accent); animation: pulse .8s infinite; }
   .sheet-status.loading { color: var(--accent); }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .url-row { display: flex; gap: 8px; margin-top: 10px; }
+  .url-row input { flex: 1; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 13px; outline: none; }
+  .setup-box { background: #fff8e1; border: 1.5px solid var(--accent); border-radius: 11px; padding: 13px; font-size: 13px; line-height: 1.7; margin-top: 11px; }
+  .setup-box h3 { font-size: 13px; font-weight: 700; color: #92400e; margin-bottom: 7px; }
+  .setup-box ol { padding-left: 16px; }
+  .setup-box li { margin-bottom: 5px; }
 
-  @media(max-width:600px) {
-    .stats-row { grid-template-columns: 1fr 1fr; }
-    .filter-bar { flex-direction: column; }
-    .filter-group input, .filter-group select { min-width: unset; width: 100%; }
-  }
+  /* TOAST */
+  .toast { position: fixed; top: 14px; left: 50%; transform: translateX(-50%) translateY(-80px); background: #1e293b; color: #fff; padding: 10px 20px; border-radius: 50px; font-size: 13px; font-weight: 600; z-index: 999; transition: transform .3s; white-space: nowrap; max-width: 90vw; text-align: center; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @media(max-width:480px) { .row2 { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="hdr-inner">
-    <div class="hdr-left">
-      <span style="font-size:24px">📋</span>
-      <div class="hdr-title">
-        <h1>Nhật Ký Điều Xe</h1>
-        <p>Xem & tra cứu lịch sử chuyến xe</p>
+  <div class="header-inner">
+    <div class="header-left">
+      <span style="font-size:24px">🚚</span>
+      <div class="header-title">
+        <h1>Quản Lý Đặt Xe Vận Tải</h1>
+        <p>Nhập thông tin & gửi cho khách</p>
       </div>
     </div>
-    <button class="btn-back" onclick="goToBooking()">🚚 Quản lý đặt xe</button>
+    <div style="display:flex;gap:8px">
+      <button class="btn-manage" onclick="openJournal()" style="background:rgba(255,255,255,.1)">📋 Nhật ký</button>
+      <button class="btn-manage" onclick="openManage()">⚙️ Danh sách</button>
+    </div>
   </div>
 </header>
 
 <main>
-  <!-- SETUP -->
-  <div class="setup-card" id="setupCard">
-    <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">📊 Kết nối Google Sheet</div>
-    <div id="connStatus" class="sheet-status no" style="margin-bottom:8px"><span class="sdot"></span><span>Chưa kết nối</span></div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Dán <strong>Apps Script URL</strong> (cùng URL với app Quản lý đặt xe):</div>
-    <div class="setup-row">
-      <input type="url" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/...">
-      <button class="btn btn-primary" onclick="saveAndFetch()">Kết nối & Tải</button>
+  <!-- ĐƠN HÀNG -->
+  <div class="card">
+    <div class="sec-label">📋 Thông tin đơn hàng</div>
+    <div class="fg">
+      <label>Tên khách hàng *</label>
+      <select id="customerType" onchange="onCustomerTypeChange()" style="margin-bottom:8px">
+        <option value="noi_bo">📋 Lệnh Điều Động Nội Bộ</option>
+        <option value="tu_nhap">✏️ Tự nhập tên khách hàng</option>
+      </select>
+      <input type="text" id="customerName" placeholder="Nhập tên khách hàng..." style="display:none">
     </div>
+    <div class="fg">
+      <label>🏭 Kho bốc hàng</label>
+      <select id="warehouseSelect" onchange="onWarehouseChange()">
+        <option value="">-- Chọn kho bốc hàng --</option>
+      </select>
+      <input type="text" id="warehouseCustom" placeholder="Nhập tên kho..." style="display:none;margin-top:8px">
+    </div>
+    <div class="row2">
+      <div class="fg"><label>Ngày vận chuyển *</label><input type="date" id="shipDate"></div>
+      <div class="fg"><label>Mã đơn hàng</label><input type="text" id="orderCode" placeholder="DH-001"></div>
+    </div>
+    <div class="fg"><label>Ghi chú đơn hàng</label><textarea id="orderNote" placeholder="Hàng hóa, yêu cầu đặc biệt..."></textarea></div>
   </div>
 
-  <!-- STATS -->
-  <div class="stats-row">
-    <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-lbl">Tổng chuyến</div></div>
-    <div class="stat-card"><div class="stat-num" id="statToday">0</div><div class="stat-lbl">Hôm nay</div></div>
-    <div class="stat-card"><div class="stat-num" id="statXe">0</div><div class="stat-lbl">Số xe</div></div>
-    <div class="stat-card"><div class="stat-num" id="statDriver">0</div><div class="stat-lbl">Lái xe</div></div>
+  <!-- CHUYẾN XE -->
+  <div class="card">
+    <div class="trips-hdr">
+      <div class="sec-label" style="margin-bottom:0;flex:1">🚛 Danh sách chuyến xe</div>
+      <button class="btn btn-outline btn-sm" onclick="addTrip()" style="margin-left:10px;flex-shrink:0">＋ Thêm chuyến</button>
+    </div>
+    <div id="tripsList"></div>
   </div>
 
-  <!-- FILTER -->
-  <div class="filter-bar">
-    <div class="filter-group">
-      <label>Ngày VC từ</label>
-      <input type="date" id="fFrom">
-    </div>
-    <div class="filter-group">
-      <label>Ngày VC đến</label>
-      <input type="date" id="fTo">
-    </div>
-    <div class="filter-group">
-      <label>Khách hàng</label>
-      <input type="text" id="fKhach" placeholder="Tìm khách...">
-    </div>
-    <div class="filter-group">
-      <label>Số xe</label>
-      <input type="text" id="fXe" placeholder="Tìm số xe...">
-    </div>
-    <div class="filter-group">
-      <label>Lái xe</label>
-      <input type="text" id="fDriver" placeholder="Tìm lái xe...">
-    </div>
-    <div class="filter-group">
-      <label>Kho bốc</label>
-      <select id="fKho"><option value="">-- Tất cả kho --</option></select>
-    </div>
-    <div style="display:flex;gap:8px;align-items:flex-end">
-      <button class="btn btn-primary" onclick="applyFilter()">🔍 Lọc</button>
-      <button class="btn btn-outline" onclick="clearFilter()">✕ Xóa</button>
-      <button class="btn btn-outline" onclick="fetchData(true)">🔄 Tải lại</button>
-    </div>
-  </div>
+  <!-- GOOGLE SHEET -->
+  <div class="card" id="sheetCard">
+    <div class="sec-label">📊 Kết nối Google Sheet</div>
 
-  <!-- TABLE -->
-  <div class="table-wrap">
-    <div class="table-head">
-      <h2>📋 Danh sách chuyến xe <span id="countLabel" style="color:var(--muted);font-weight:400"></span></h2>
-      <button class="btn btn-outline" onclick="exportCSV()" style="font-size:12px;padding:6px 12px">⬇️ Xuất CSV</button>
+    <!-- Ghi đơn hàng -->
+    <div style="margin-bottom:14px">
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px">📤 URL ghi đơn hàng (Apps Script)</div>
+      <div id="sheetStatus" class="sheet-status no"><span class="sdot"></span><span>Chưa cài đặt</span></div>
+      <div class="url-row">
+        <input type="url" id="sheetUrl" placeholder="Dán Web App URL từ Apps Script...">
+        <button class="btn btn-primary btn-sm" onclick="saveSheetUrl()">Lưu</button>
+      </div>
     </div>
-    <div class="table-scroll">
-      <table>
-        <thead>
-          <tr>
-            <th onclick="sortBy('ngaytao')">#<span class="sort-icon">↕</span></th>
-            <th onclick="sortBy('ngaytao')">Ngày tạo<span class="sort-icon">↕</span></th>
-            <th onclick="sortBy('khach')">Khách hàng<span class="sort-icon">↕</span></th>
-            <th onclick="sortBy('khoboc')">Kho bốc<span class="sort-icon">↕</span></th>
-            <th onclick="sortBy('ngayvc')" style="background:#fff8e1">Ngày VC<span class="sort-icon">↕</span></th>
-            <th>Chuyến</th>
-            <th onclick="sortBy('soxe')">Số xe<span class="sort-icon">↕</span></th>
-            <th>Tuyến</th>
-            <th onclick="sortBy('laixe')">Lái xe<span class="sort-icon">↕</span></th>
-            <th>SĐT</th>
-            <th>CCCD</th>
-            <th>Điểm giao</th>
-            <th>Giờ</th>
-            <th>Ghi chú</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody">
-          <tr><td colspan="15"><div class="empty-state"><div class="ico">📊</div><p>Nhập Apps Script URL ở trên để tải dữ liệu</p></div></td></tr>
-        </tbody>
-      </table>
+
+    <!-- Đọc dữ liệu xe & lái xe -->
+    <div style="border-top:1px solid var(--border);padding-top:14px">
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px">📥 Tải dữ liệu xe, lái xe & kho</div>
+      <div style="font-size:11px;color:var(--muted);background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:9px;line-height:1.7;margin-bottom:8px">
+        ✅ Dùng <strong>Apps Script URL</strong> ở trên — nhấn <strong>Lưu</strong> là tự tải.<br>
+        Cập nhật Sheet xong → nhấn <strong>🔄 Tải lại</strong>.
+      </div>
+      <div id="dataStatus" class="sheet-status no"><span class="sdot"></span><span>Chưa tải dữ liệu</span></div>
+      <button class="btn btn-outline btn-sm" onclick="loadFromSheet(true)" style="margin-top:10px;width:100%;justify-content:center">
+        🔄 Tải lại dữ liệu từ Sheet
+      </button>
+    </div>
+
+    <div style="margin-top:12px">
+      <button onclick="toggleGuide()" style="background:none;border:none;color:var(--primary);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">📖 Hướng dẫn cài đặt ▾</button>
+      <div id="guide" style="display:none">
+        <div class="setup-box">
+          <h3>📌 Cách cài đặt (làm 1 lần)</h3>
+          <ol>
+            <li>Tạo <strong>Google Sheet</strong> với 3 tab: <strong>SoXe</strong>, <strong>LaiXe</strong>, <strong>KhoBoc</strong></li>
+            <li>Tab <strong>SoXe</strong>: cột A = Biển số, cột B = Loại xe</li>
+            <li>Tab <strong>LaiXe</strong>: cột A = Tên, cột B = SĐT, cột C = CCCD</li>
+            <li>Tab <strong>KhoBoc</strong>: cột A = Tên kho (mỗi kho 1 dòng)</li>
+            <li>Copy <strong>Sheet ID</strong> từ URL → dán vào ô trên → Lưu → Tải dữ liệu</li>
+            <li>Nhớ <strong>share sheet</strong>: Anyone with the link → Viewer</li>
+          </ol>
+          <div style="background:#e0f2fe;border-radius:8px;padding:10px;margin-top:10px;font-size:12px">
+            <strong>📋 Mẫu dữ liệu tab SoXe:</strong><br>
+            A1: 29H-77696 &nbsp; B1: Xe tải<br>
+            A2: 29E-12900 &nbsp; B2: Container<br><br>
+            <strong>📋 Mẫu dữ liệu tab LaiXe:</strong><br>
+            A1: Ngô Hoàng Vũ &nbsp; B1: 0559827827 &nbsp; C1: 079083034316
+          </div>
+          <div style="margin-top:12px;border-top:1px solid #fde68a;padding-top:12px">
+            <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:6px">📤 Apps Script (ghi đơn hàng):</div>
+            <ol>
+              <li>Vào <strong>Extensions → Apps Script</strong> trong sheet</li>
+              <li>Dán code → Deploy → Web app → Anyone → Deploy</li>
+              <li>Copy URL dán vào ô "URL ghi đơn hàng" ở trên</li>
+            </ol>
+            <button onclick="copyScript()" class="btn btn-outline btn-sm" style="margin-top:8px">📋 Copy Code Apps Script</button>
+            <textarea id="scriptCode" readonly style="display:none"></textarea>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </main>
 
+<!-- BOTTOM -->
+<div class="bottom-bar">
+  <div class="bottom-inner">
+    <button class="btn-sheet" onclick="saveToSheet()">📊 Lưu Sheet</button>
+    <button class="btn-send" onclick="showPreview()">📨 Gửi thông tin cho khách</button>
+  </div>
+</div>
+
+<!-- MODAL QUẢN LÝ -->
+<div class="modal-ov" id="manageModal" onclick="handleOv(event,'manageModal')">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h2>⚙️ Quản lý danh sách</h2>
+      <button class="modal-x" onclick="closeModal('manageModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab active" id="tab-xe" onclick="switchTab('xe')">🚘 Xe (<span id="cntXe">0</span>)</button>
+        <button class="tab" id="tab-lx" onclick="switchTab('lx')">👤 Lái xe (<span id="cntLx">0</span>)</button>
+        <button class="tab" id="tab-kho" onclick="switchTab('kho')">🏭 Kho (<span id="cntKho">0</span>)</button>
+      </div>
+
+      <!-- PANEL XE -->
+      <div id="panel-xe">
+        <div class="add-box">
+          <h3>➕ Thêm số xe mới</h3>
+          <div class="fg"><label>Biển số xe *</label><input type="text" id="newPlate" placeholder="VD: 29H-77696"></div>
+          <div class="fg"><label>Loại xe (không bắt buộc)</label><input type="text" id="newType" placeholder="VD: Container 20, Xe tải 5T..."></div>
+          <button class="btn btn-primary" onclick="addPlate()" style="width:100%;justify-content:center">✓ Thêm xe</button>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:9px">Danh sách xe (<span id="cntXe2">0</span>)</div>
+        <div id="plateList"></div>
+      </div>
+
+      <!-- PANEL LÁI XE -->
+      <div id="panel-lx" style="display:none">
+        <div class="add-box">
+          <h3>➕ Thêm lái xe mới</h3>
+          <div class="fg"><label>Tên lái xe *</label><input type="text" id="newDriver" placeholder="Nguyễn Văn A"></div>
+          <div class="fg"><label>Số điện thoại *</label><input type="tel" id="newPhone" placeholder="0909090909" inputmode="tel"></div>
+          <div class="fg"><label>Số CCCD</label><input type="text" id="newCCCD" placeholder="0123456789012" inputmode="numeric" maxlength="12"></div>
+          <button class="btn btn-primary" onclick="addDriver()" style="width:100%;justify-content:center">✓ Thêm lái xe</button>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:9px">Danh sách lái xe (<span id="cntLx2">0</span>)</div>
+        <div id="driverList"></div>
+      </div>
+
+      <!-- PANEL KHO -->
+      <div id="panel-kho" style="display:none">
+        <div class="add-box">
+          <h3>➕ Thêm kho mới</h3>
+          <div class="fg"><label>Tên kho *</label><input type="text" id="newKho" placeholder="VD: Kho Bình Dương, Kho HCM..."></div>
+          <button class="btn btn-primary" onclick="addKho()" style="width:100%;justify-content:center">✓ Thêm kho</button>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:9px">Danh sách kho (<span id="cntKho2">0</span>)</div>
+        <div id="khoList"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline btn-sm" onclick="resetToDefault()" style="color:var(--danger);border-color:var(--danger)">🔄 Mặc định</button>
+      <button class="btn btn-primary" onclick="closeModal('manageModal')" style="flex:1;justify-content:center">✓ Xong</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PREVIEW -->
+<div class="modal-ov" id="previewModal" onclick="handleOv(event,'previewModal')">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h2>📋 Thông tin gửi khách</h2>
+      <button class="modal-x" onclick="closeModal('previewModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Chụp màn hình hoặc nhấn Copy để gửi qua Zalo/tin nhắn:</p>
+      <div class="preview-box" id="previewContent"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="copyPreview()" style="flex:1;justify-content:center">📋 Copy nội dung</button>
+      <button class="btn btn-primary" onclick="closeModal('previewModal')" style="flex:1;justify-content:center">✓ Đóng</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-var scriptUrl = localStorage.getItem('nkScriptUrl') || localStorage.getItem('sheetUrl') || '';
-var allRows   = [];
-var sortKey   = 'ngaytao';
-var sortAsc   = false;
+// ===== DATA =====
+let tripCount = 0;
+let sheetUrl = localStorage.getItem('sheetUrl') || '';
+let plates     = JSON.parse(localStorage.getItem('plates')     || '[]');
+let drivers    = JSON.parse(localStorage.getItem('drivers')    || '[]');
+let warehouses = JSON.parse(localStorage.getItem('warehouses') || '[]');
 
-// ── Init ──
-window.onload = function() {
-  var today = new Date().toISOString().split('T')[0];
-  document.getElementById('fTo').value   = today;
-  var ago30 = new Date(Date.now() - 30*864e5).toISOString().split('T')[0];
-  document.getElementById('fFrom').value = ago30;
+// Dữ liệu mẫu nếu lần đầu dùng
+// ── Dữ liệu mặc định (tăng DATA_VERSION khi muốn reset cache) ──
+var DATA_VERSION = '6';
+var DEFAULT_PLATES = [
+  { id: 1,  plate: '29H-77696', type: '' },
+  { id: 2,  plate: '29E-12900', type: '' },
+  { id: 3,  plate: '29C-18487', type: '' },
+  { id: 4,  plate: '29C-36832', type: '' },
+  { id: 5,  plate: '29E-12960', type: '' },
+  { id: 6,  plate: '29E-11431', type: '' },
+  { id: 7,  plate: '30M-84876', type: '' },
+  { id: 8,  plate: '30M-85015', type: '' },
+  { id: 9,  plate: '30M-87069', type: '' },
+];
+var DEFAULT_DRIVERS = [
+  { id: 1, name: 'Ngô Hoàng Vũ',      phone: '0559827827', cccd: '079083034316' },
+  { id: 2, name: 'Lâm Tân Ninh',       phone: '',           cccd: '' },
+  { id: 3, name: 'Tô Minh Điền',       phone: '0933169658', cccd: '079089031423' },
+  { id: 4, name: 'Trương Minh Nhật',   phone: '0339091407', cccd: '072099004044' },
+  { id: 5, name: 'Huỳnh Văn Tâm',      phone: '0358388319', cccd: '079074012097' },
+  { id: 6, name: 'Nguyễn Thanh Tùng',  phone: '0909525211', cccd: '079095017712' },
+  { id: 7, name: 'Phước Lành',         phone: '',           cccd: '' },
+  { id: 8, name: 'Minh Phú',           phone: '',           cccd: '' },
+  { id: 9, name: 'Chành',              phone: '',           cccd: '' },
+];
 
-  if (scriptUrl) {
-    document.getElementById('scriptUrlInput').value = scriptUrl;
-    setStatus('ok', 'Đã kết nối');
-    fetchData(false);
+var DEFAULT_WAREHOUSES = [
+  'Kho Hiệp phước','Kho AJ','Kho AG','Kho Lotte','Kho Satra',
+  'Kho Lutos Tân Kim','Kho E50','Kho Theo Lệch Xuất của kho',
+  'Kho Transimex','Kinder _Lê Văn Lương',
+  'Nhà Hàng_Phan Văn Trị','Nhà Hàng Tân Phú','Nhà Hàng Bình Dương',
+];
+
+if (localStorage.getItem('dataVersion') !== DATA_VERSION || plates.length === 0) {
+  plates = JSON.parse(JSON.stringify(DEFAULT_PLATES));
+  savePlates();
+}
+if (localStorage.getItem('dataVersion') !== DATA_VERSION || drivers.length === 0) {
+  drivers = JSON.parse(JSON.stringify(DEFAULT_DRIVERS));
+  saveDrivers();
+}
+if (localStorage.getItem('dataVersion') !== DATA_VERSION || warehouses.length === 0) {
+  warehouses = DEFAULT_WAREHOUSES.slice();
+  saveWarehouses();
+  localStorage.setItem('dataVersion', DATA_VERSION);
+}
+
+function resetToDefault() {
+  if (!confirm('Xoá toàn bộ xe & lái xe hiện tại và khôi phục danh sách mặc định?')) return;
+  plates  = JSON.parse(JSON.stringify(DEFAULT_PLATES));
+  drivers = JSON.parse(JSON.stringify(DEFAULT_DRIVERS));
+  savePlates();
+  saveDrivers();
+  localStorage.setItem('dataVersion', DATA_VERSION);
+  refreshSelects('plate');
+  refreshSelects('driver');
+  updateManageCounts();
+  showToast('✅ Đã khôi phục dữ liệu mặc định!');
+}
+
+const SCRIPT = `// ===== ĐỌC DỮ LIỆU (xe, lái xe, kho) =====
+function doGet(e) {
+  try {
+    var ss   = SpreadsheetApp.getActiveSpreadsheet();
+    var type = e && e.parameter && e.parameter.type ? e.parameter.type : 'all';
+
+    // ── Trả dữ liệu nhật ký cho app Nhật Ký Điều Xe ──
+    if (type === 'journal') {
+      var res = { ChuyenXe: [] };
+      var sh  = ss.getSheetByName('ChuyenXe');
+      if (sh && sh.getLastRow() > 1) {
+        var vals = sh.getDataRange().getValues();
+        for (var i = 1; i < vals.length; i++) {
+          res.ChuyenXe.push(vals[i]);
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({status:'success',data:res})).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // ── Trả danh sách xe, lái xe, kho cho app Đặt Xe ──
+    var res2 = { SoXe:[], LaiXe:[], KhoBoc:[] };
+    var sXe = ss.getSheetByName('SoXe');
+    if (sXe) sXe.getDataRange().getValues().forEach(function(r){
+      var p=String(r[0]||'').trim().toUpperCase(); if(p) res2.SoXe.push({plate:p,type:String(r[1]||'').trim()});
+    });
+    var sLx = ss.getSheetByName('LaiXe');
+    if (sLx) sLx.getDataRange().getValues().forEach(function(r){
+      var n=String(r[0]||'').trim(); if(n) res2.LaiXe.push({name:n,phone:String(r[1]||'').trim(),cccd:String(r[2]||'').trim()});
+    });
+    var sKho = ss.getSheetByName('KhoBoc');
+    if (sKho) sKho.getDataRange().getValues().forEach(function(r){
+      var k=String(r[0]||'').trim(); if(k) res2.KhoBoc.push(k);
+    });
+    return ContentService.createTextOutput(JSON.stringify({status:'success',data:res2})).setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({status:'error',msg:err.toString()})).setMimeType(ContentService.MimeType.JSON);
   }
+}
 
-  // Lưu link bản thân để app kia mở được
-  localStorage.setItem('journalUrl', window.location.href);
+// ===== GHI / SỬA DANH SÁCH & ĐƠN HÀNG =====
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var ss   = SpreadsheetApp.getActiveSpreadsheet();
+    var out  = ContentService.createTextOutput;
+    var JSON_TYPE = ContentService.MimeType.JSON;
 
-  // Thiết lập nút quay lại
-  var bookingUrl = localStorage.getItem('bookingUrl') || '';
-  if (!bookingUrl) localStorage.setItem('journalUrl', window.location.href);
+    // ── Thêm 1 dòng vào tab danh sách ──
+    if (data.action === 'addRow') {
+      var sh = ss.getSheetByName(data.sheet) || ss.insertSheet(data.sheet);
+      sh.appendRow(data.row);
+      return out(JSON.stringify({status:'success'})).setMimeType(JSON_TYPE);
+    }
+
+    // ── Xóa dòng khớp giá trị cột đầu ──
+    if (data.action === 'deleteRow') {
+      var sh2 = ss.getSheetByName(data.sheet);
+      if (sh2) {
+        var vals = sh2.getDataRange().getValues();
+        for (var i = vals.length - 1; i >= 0; i--) {
+          if (String(vals[i][0]).trim() === String(data.key).trim()) {
+            sh2.deleteRow(i + 1); break;
+          }
+        }
+      }
+      return out(JSON.stringify({status:'success'})).setMimeType(JSON_TYPE);
+    }
+
+    // ── Ghi đơn hàng (mặc định) ──
+    var os = ss.getSheetByName('DonHang') || ss.insertSheet('DonHang');
+    if (os.getLastRow()===0) os.appendRow(['Ngay tao','Ma DH','Ten khach','Kho boc','Ngay vc','Ghi chu']);
+    os.appendRow([new Date().toLocaleString('vi-VN'), data.orderCode||'', data.customerName, data.warehouse||'', data.shipDate, data.orderNote||'']);
+    var ts = ss.getSheetByName('ChuyenXe') || ss.insertSheet('ChuyenXe');
+    if (ts.getLastRow()===0) ts.appendRow(['Ngay tao','Ma DH','Khach','Kho boc','Ngay vc','Chuyen','So xe','Loai xe','Tuyen','Lai xe','SDT','CCCD','Diem giao','Gio','Ghi chu']);
+    data.trips.forEach(function(t,i){ ts.appendRow([new Date().toLocaleString('vi-VN'),data.orderCode||'',data.customerName,data.warehouse||'',data.shipDate||'',i+1,t.plate,t.type||'',t.route||'',t.driver,t.phone,t.cccd||'',t.delivery||'',t.time||'',t.note||'']); });
+    return out(JSON.stringify({status:'success'})).setMimeType(JSON_TYPE);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({status:'error',msg:err.toString()})).setMimeType(ContentService.MimeType.JSON);
+  }
+}`;
+
+document.getElementById('scriptCode').value = SCRIPT;
+
+// ===== INIT =====
+
+
+window.onload = function() {
+  document.getElementById('shipDate').value = new Date().toISOString().split('T')[0];
+  addTrip();
+  renderWarehouseSelect();
+  if (sheetUrl) {
+    document.getElementById('sheetUrl').value = sheetUrl;
+    setSheetStatus(true);
+    loadFromSheet(false);
+  }
+  renderWarehouseSelect();
+
 };
 
-// ── Booking app link ──
-function goToBooking() {
-  // Thử lấy từ localStorage (được lưu khi mở từ app booking)
-  var url = localStorage.getItem('bookingUrl') || '';
-  if (url) { window.location.href = url; return; }
-  // Fallback: cùng thư mục
-  var cur = window.location.href;
-  var base = cur.substring(0, cur.lastIndexOf('/') + 1);
-  var guess = base + 'van-tai-booking.html';
-  if (confirm('Mở app đặt xe tại:\n' + guess + '\n\nNhấn OK để mở')) {
-    window.location.href = guess;
-  }
-}
 
-// ── Connect ──
-function saveAndFetch() {
-  var url = document.getElementById('scriptUrlInput').value.trim();
-  if (!url) { showToast('⚠️ Nhập URL'); return; }
-  scriptUrl = url;
-  localStorage.setItem('nkScriptUrl', url);
-  localStorage.setItem('sheetUrl', url); // chia sẻ với app kia
-  setStatus('ok', 'Đã lưu');
-  fetchData(true);
-}
 
-// ── Fetch data from Apps Script ──
-async function fetchData(showFeedback) {
-  if (!scriptUrl) return;
-  if (showFeedback) { setStatus('loading', '⏳ Đang tải...'); showToast('⏳ Đang tải dữ liệu...'); }
-  try {
-    var res  = await fetch(scriptUrl + '?type=journal');
-    var json = await res.json();
-    if (json.status !== 'success') throw new Error(json.msg || 'Lỗi');
-    allRows = json.data.ChuyenXe || [];
-    buildKhoFilter();
-    applyFilter();
-    updateStats();
-    setStatus('ok', '✅ Đã tải ' + allRows.length + ' chuyến');
-    if (showFeedback) showToast('✅ Đã tải ' + allRows.length + ' chuyến');
-    document.getElementById('setupCard').classList.add('hidden');
-    if (allRows.length === 0) {
-      document.getElementById('setupCard').classList.remove('hidden');
-    }
-  } catch(err) {
-    console.error(err);
-    setStatus('no', '❌ Lỗi kết nối');
-    if (showFeedback) showToast('❌ ' + (err.message || 'Lỗi kết nối'));
-  }
-}
-
-// ── Build kho filter options ──
-function buildKhoFilter() {
-  var sel  = document.getElementById('fKho');
-  var khos = [...new Set(allRows.map(function(r){ return r[3]||''; }).filter(Boolean))].sort();
-  sel.innerHTML = '<option value="">-- Tất cả kho --</option>';
-  khos.forEach(function(k){ sel.innerHTML += '<option value="' + k + '">' + k + '</option>'; });
-}
-
-// ── Filter ──
-function applyFilter() {
-  var fFrom   = document.getElementById('fFrom').value;
-  var fTo     = document.getElementById('fTo').value;
-  var fKhach  = document.getElementById('fKhach').value.trim().toLowerCase();
-  var fXe     = document.getElementById('fXe').value.trim().toLowerCase();
-  var fDriver = document.getElementById('fDriver').value.trim().toLowerCase();
-  var fKho    = document.getElementById('fKho').value;
-
-  var filtered = allRows.filter(function(r) {
-    // Lọc theo Ngay vc (cột 4) — định dạng yyyy-mm-dd
-    var ngayVc = String(r[4]||'');
-    if (ngayVc) {
-      if (fFrom && ngayVc < fFrom) return false;
-      if (fTo   && ngayVc > fTo)   return false;
-    }
-    if (fKhach  && !String(r[2]||'').toLowerCase().includes(fKhach))  return false;
-    if (fXe     && !String(r[6]||'').toLowerCase().includes(fXe))     return false;
-    if (fDriver && !String(r[9]||'').toLowerCase().includes(fDriver)) return false;
-    if (fKho    && String(r[3]||'') !== fKho) return false;
-    return true;
-  });
-
-  filtered.sort(function(a, b) {
-    var idx = {ngaytao:0, khach:2, khoboc:3, ngayvc:4, soxe:6, laixe:9}[sortKey] || 0;
-    var va = String(a[idx]||''), vb = String(b[idx]||'');
-    return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
-  });
-
-  renderTable(filtered);
-  document.getElementById('countLabel').textContent = '(' + filtered.length + ' kết quả)';
-}
-
-function clearFilter() {
-  document.getElementById('fKhach').value  = '';
-  document.getElementById('fXe').value     = '';
-  document.getElementById('fDriver').value = '';
-  document.getElementById('fKho').value    = '';
-  var today = new Date().toISOString().split('T')[0];
-  document.getElementById('fTo').value = today;
-  document.getElementById('fFrom').value = new Date(Date.now()-30*864e5).toISOString().split('T')[0];
-  applyFilter();
-}
-
-// ── Sort ──
-function sortBy(key) {
-  if (sortKey === key) { sortAsc = !sortAsc; }
-  else { sortKey = key; sortAsc = true; }
-  document.querySelectorAll('thead th').forEach(function(th){th.classList.remove('active');});
-  applyFilter();
-}
-
-// ── Render table ──
-function renderTable(rows) {
-  var tb = document.getElementById('tableBody');
-  if (!rows.length) {
-    tb.innerHTML = '<tr><td colspan="15"><div class="empty-state"><div class="ico">🔍</div><p>Không có dữ liệu khớp điều kiện lọc</p></div></td></tr>';
-    return;
-  }
-  var html = '';
-  rows.forEach(function(r, i) {
-    html += '<tr>';
-    html += '<td style="color:var(--muted);font-size:11px">' + (i+1) + '</td>';
-    html += '<td style="font-size:11px;color:var(--muted)">' + (r[0]||'') + '</td>';
-    html += '<td><strong>' + (r[2]||'') + '</strong></td>';
-    html += '<td><span class="badge badge-blue">' + (r[3]||'-') + '</span></td>';
-    html += '<td style="font-weight:600;color:var(--primary)">' + (r[4]||'') + '</td>';
-    html += '<td style="text-align:center"><span class="badge badge-green">' + (r[5]||'') + '</span></td>';
-    html += '<td><strong style="color:var(--primary)">' + (r[6]||'') + '</strong>' + (r[7] ? ' <span style="color:var(--muted);font-size:11px">(' + r[7] + ')</span>' : '') + '</td>';
-    html += '<td>' + (r[8]||'') + '</td>';
-    html += '<td>' + (r[9]||'') + '</td>';
-    html += '<td><a href="tel:' + (r[10]||'') + '" style="color:var(--primary);text-decoration:none;font-weight:600">' + (r[10]||'') + '</a></td>';
-    html += '<td style="font-size:11px;color:var(--muted)">' + (r[11]||'') + '</td>';
-    html += '<td style="text-align:center">' + (r[12] ? '<strong>' + r[12] + '</strong>' : '-') + '</td>';
-    html += '<td>' + (r[13]||'') + '</td>';
-    html += '<td style="color:var(--muted)">' + (r[14]||'') + '</td>';
-    html += '</tr>';
-  });
-  tb.innerHTML = html;
-}
-
-// ── Stats ──
-function updateStats() {
-  var today = new Date().toLocaleDateString('vi-VN');
-  var todayRows = allRows.filter(function(r){ return String(r[4]||'') === new Date().toISOString().split('T')[0]; });
-  var plates  = new Set(allRows.map(function(r){return r[6]||'';}));
-  var drivers = new Set(allRows.map(function(r){return r[9]||'';}));
-  document.getElementById('statTotal').textContent  = allRows.length;
-  document.getElementById('statToday').textContent  = todayRows.length;
-  document.getElementById('statXe').textContent     = plates.size;
-  document.getElementById('statDriver').textContent = drivers.size;
-}
-
-// ── Export CSV ──
-function exportCSV() {
-  var header = ['Ngay tao','Ma DH','Khach','Kho boc','Chuyen','So xe','Loai xe','Tuyen','Lai xe','SDT','CCCD','Diem giao','Gio','Ghi chu'];
-  var rows   = [header].concat(allRows);
-  var csv    = rows.map(function(r){ return r.map(function(c){ return '"'+String(c||'').replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
-  var blob   = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
-  var a      = document.createElement('a');
-  a.href     = URL.createObjectURL(blob);
-  a.download = 'nhat-ky-dieu-xe-' + new Date().toISOString().split('T')[0] + '.csv';
-  a.click();
-  showToast('✅ Đã xuất file CSV!');
-}
-
-// ── Utils ──
-function setStatus(state, msg) {
-  var bar = document.getElementById('connStatus');
-  bar.className = 'sheet-status ' + state;
+function setDataStatus(state, msg) {
+  var bar = document.getElementById('dataStatus');
+  if (!bar) return;
+  bar.className = 'sheet-status ' + (state === 'connected' ? 'ok' : state === 'loading' ? 'loading' : 'no');
   bar.innerHTML = '<span class="sdot"></span><span>' + msg + '</span>';
 }
+
+async function loadFromSheet(showFeedback) {
+  if (!sheetUrl) {
+    if (showFeedback) showToast('⚠️ Chưa nhập Apps Script URL');
+    setDataStatus('no', '⚠️ Cần nhập Apps Script URL trước');
+    return;
+  }
+  if (showFeedback) { setDataStatus('loading', '⏳ Đang tải...'); showToast('⏳ Đang tải dữ liệu...'); }
+  try {
+    var res  = await fetch(sheetUrl);
+    var json = await res.json();
+    if (json.status !== 'success') throw new Error(json.msg || 'Lỗi');
+    var d = json.data;
+    var np = (d.SoXe||[]).map(function(r,i){ return {id:Date.now()+i, plate:r.plate, type:r.type}; });
+    var nd = (d.LaiXe||[]).map(function(r,i){ return {id:Date.now()+1000+i, name:r.name, phone:r.phone, cccd:r.cccd}; });
+    var nw = d.KhoBoc||[];
+    if (!np.length && !nd.length) {
+      setDataStatus('no','⚠️ Sheet chưa có dữ liệu — kiểm tra tab SoXe, LaiXe');
+      if (showFeedback) showToast('⚠️ Sheet chưa có dữ liệu'); return;
+    }
+    plates=np; drivers=nd; warehouses=nw;
+    savePlates(); saveDrivers(); saveWarehouses();
+    refreshSelects('plate'); refreshSelects('driver');
+    renderWarehouseSelect(); renderKhoList(); updateManageCounts();
+    var msg='✅ Đã tải: '+np.length+' xe, '+nd.length+' lái xe'+(nw.length?', '+nw.length+' kho':'');
+    setDataStatus('connected', msg);
+    if (showFeedback) showToast(msg);
+  } catch(err) {
+    console.error(err);
+    setDataStatus('no','❌ Lỗi kết nối Apps Script');
+    if (showFeedback) showToast('❌ '+(err.message||'Lỗi kết nối'));
+  }
+}
+
+// ===== PLATES =====
+// ===== TIME SLOTS =====
+function timeSlotOptions() {
+  var opts = '<option value="">-- Chọn khung giờ --</option>';
+  for (var h = 0; h < 24; h++) {
+    var from = (h < 10 ? '0' : '') + h + ':00';
+    var to   = ((h+1) < 10 ? '0' : '') + (h+1) + ':00';
+    if (h === 23) to = '00:00';
+    opts += '<option value="' + from + '-' + to + '">' + from + ' - ' + to + '</option>';
+  }
+  return opts;
+}
+
+// ===== CUSTOMER TYPE =====
+function onCustomerTypeChange() {
+  var type  = document.getElementById('customerType').value;
+  var input = document.getElementById('customerName');
+  input.style.display = type === 'tu_nhap' ? '' : 'none';
+  if (type !== 'tu_nhap') input.value = '';
+}
+
+function getCustomerName() {
+  var type = document.getElementById('customerType').value;
+  if (type === 'noi_bo') return 'Lệnh Điều Động Nội Bộ';
+  return document.getElementById('customerName').value.trim();
+}
+
+// ===== WAREHOUSES =====
+function saveWarehouses() { localStorage.setItem('warehouses', JSON.stringify(warehouses)); }
+
+// ── Ghi 1 dòng mới lên Sheet ──
+function sheetAddRow(sheetName, row) {
+  if (!sheetUrl) return;
+  fetch(sheetUrl, {
+    method:'POST', mode:'no-cors',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ action:'addRow', sheet: sheetName, row: row })
+  }).catch(function(){});
+}
+
+// ── Xóa dòng khớp key (cột A) trên Sheet ──
+function sheetDeleteRow(sheetName, key) {
+  if (!sheetUrl) return;
+  fetch(sheetUrl, {
+    method:'POST', mode:'no-cors',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ action:'deleteRow', sheet: sheetName, key: key })
+  }).catch(function(){});
+}
+
+function addKho() {
+  var name = (document.getElementById('newKho') || {value:''}).value.trim();
+  if (!name) { showToast('⚠️ Nhập tên kho'); return; }
+  if (warehouses.indexOf(name) >= 0) { showToast('⚠️ Kho này đã có'); return; }
+  warehouses.push(name);
+  saveWarehouses();
+  sheetAddRow('KhoBoc', [name]);
+  document.getElementById('newKho').value = '';
+  renderKhoList(); renderWarehouseSelect(); updateManageCounts();
+  showToast('✅ Đã thêm & lưu lên Sheet: ' + name);
+}
+
+function delKho(i) {
+  var name = warehouses[i];
+  warehouses.splice(i, 1);
+  saveWarehouses();
+  if (name) sheetDeleteRow('KhoBoc', name);
+  renderKhoList(); renderWarehouseSelect(); updateManageCounts();
+  showToast('🗑️ Đã xóa kho & cập nhật Sheet');
+}
+
+function renderKhoList() {
+  var el = document.getElementById('khoList');
+  if (!el) return;
+  if (!warehouses.length) {
+    el.innerHTML = '<div class="empty"><div class="ico">🏭</div><p>Chưa có kho nào.</p></div>';
+    updateManageCounts(); return;
+  }
+  el.innerHTML = '';
+  warehouses.forEach(function(w, i) {
+    var d = document.createElement('div');
+    d.className = 'list-item';
+    d.innerHTML = '<div class="list-item-info"><div class="list-name">🏭 ' + w + '</div></div>'
+      + '<button class="btn-del" onclick="delKho(' + i + ')">🗑</button>';
+    el.appendChild(d);
+  });
+  updateManageCounts();
+}
+
+function renderWarehouseSelect() {
+  var sel = document.getElementById('warehouseSelect');
+  if (!sel) return;
+  var cur = sel.value;
+  sel.innerHTML = '<option value="">-- Chọn kho bốc hàng --</option>';
+  warehouses.forEach(function(w) {
+    sel.innerHTML += '<option value="' + w + '">' + w + '</option>';
+  });
+  sel.innerHTML += '<option value="__wh_custom__">✏️ Tự ghi kho khác...</option>';
+  if (cur) sel.value = cur;
+}
+
+function onWarehouseChange() {
+  var sel = document.getElementById('warehouseSelect');
+  var inp = document.getElementById('warehouseCustom');
+  if (!sel || !inp) return;
+  inp.style.display = sel.value === '__wh_custom__' ? '' : 'none';
+  if (sel.value !== '__wh_custom__') inp.value = '';
+  else inp.focus();
+}
+
+function getWarehouse() {
+  var sel = document.getElementById('warehouseSelect');
+  if (!sel) return '';
+  if (sel.value === '__wh_custom__') {
+    var inp = document.getElementById('warehouseCustom');
+    return inp ? inp.value.trim() : '';
+  }
+  return sel.value;
+}
+
+function savePlates()  { localStorage.setItem('plates',  JSON.stringify(plates));  }
+function saveDrivers() { localStorage.setItem('drivers', JSON.stringify(drivers)); }
+
+function plateOptions() {
+  if (!plates.length) return '<option value="">-- Chưa có xe, nhấn ⚙️ Danh sách để thêm --</option>';
+  let o = '<option value="">-- Chọn số xe --</option>';
+  plates.forEach(function(p) {
+    o += '<option value="' + p.id + '">' + p.plate + (p.type ? ' (' + p.type + ')' : '') + '</option>';
+  });
+  return o;
+}
+
+function driverOptions() {
+  if (!drivers.length) return '<option value="">-- Chưa có lái xe, nhấn ⚙️ Danh sách để thêm --</option>';
+  let o = '<option value="">-- Chọn lái xe --</option>';
+  drivers.forEach(function(d) {
+    o += '<option value="' + d.id + '">' + d.name + ' — ' + d.phone + '</option>';
+  });
+  return o;
+}
+
+function addPlate() {
+  const plate = document.getElementById('newPlate').value.trim().toUpperCase();
+  const type  = document.getElementById('newType').value.trim();
+  if (!plate) { showToast('⚠️ Nhập biển số xe'); return; }
+  if (plates.find(function(p){ return p.plate === plate; })) { showToast('⚠️ Biển số này đã có'); return; }
+  plates.push({ id: Date.now(), plate: plate, type: type });
+  savePlates();
+  sheetAddRow('SoXe', [plate, type]);
+  document.getElementById('newPlate').value = '';
+  document.getElementById('newType').value  = '';
+  renderPlates(); refreshSelects('plate'); updateManageCounts();
+  showToast('✅ Đã thêm & lưu lên Sheet: ' + plate);
+}
+
+function delPlate(id) {
+  var found = plates.find(function(p){ return p.id === id; });
+  plates = plates.filter(function(p){ return p.id !== id; });
+  savePlates();
+  if (found) sheetDeleteRow('SoXe', found.plate);
+  renderPlates(); refreshSelects('plate'); updateManageCounts();
+  showToast('🗑️ Đã xóa xe & cập nhật Sheet');
+}
+
+function addDriver() {
+  const name  = document.getElementById('newDriver').value.trim();
+  const phone = document.getElementById('newPhone').value.trim();
+  const cccd  = document.getElementById('newCCCD').value.trim();
+  if (!name || !phone) { showToast('⚠️ Nhập đủ tên và SĐT'); return; }
+  drivers.push({ id: Date.now(), name: name, phone: phone, cccd: cccd });
+  saveDrivers();
+  sheetAddRow('LaiXe', [name, phone, cccd]);
+  document.getElementById('newDriver').value = '';
+  document.getElementById('newPhone').value  = '';
+  document.getElementById('newCCCD').value   = '';
+  renderDrivers(); refreshSelects('driver'); updateManageCounts();
+  showToast('✅ Đã thêm & lưu lên Sheet: ' + name);
+}
+
+function delDriver(id) {
+  var found = drivers.find(function(d){ return d.id === id; });
+  drivers = drivers.filter(function(d){ return d.id !== id; });
+  saveDrivers();
+  if (found) sheetDeleteRow('LaiXe', found.name);
+  renderDrivers(); refreshSelects('driver'); updateManageCounts();
+  showToast('🗑️ Đã xóa lái xe & cập nhật Sheet');
+}
+
+function renderPlates() {
+  const el = document.getElementById('plateList');
+  if (!plates.length) { el.innerHTML = '<div class="empty"><div class="ico">🚘</div><p>Chưa có xe nào.</p></div>'; return; }
+  el.innerHTML = '';
+  plates.forEach(function(p) {
+    const d = document.createElement('div');
+    d.className = 'list-item';
+    d.innerHTML = '<div class="list-item-info"><div class="list-plate">' + p.plate + '</div>' + (p.type ? '<div class="list-sub">' + p.type + '</div>' : '') + '</div><button class="btn-del" onclick="delPlate(' + p.id + ')">🗑</button>';
+    el.appendChild(d);
+  });
+}
+
+function renderDrivers() {
+  const el = document.getElementById('driverList');
+  if (!drivers.length) { el.innerHTML = '<div class="empty"><div class="ico">👤</div><p>Chưa có lái xe nào.</p></div>'; return; }
+  el.innerHTML = '';
+  drivers.forEach(function(d) {
+    const div = document.createElement('div');
+    div.className = 'list-item';
+    div.innerHTML = '<div class="list-item-info"><div class="list-name">👤 ' + d.name + '</div><div class="list-sub">📞 ' + d.phone + (d.cccd ? ' &nbsp;|&nbsp; 🪪 ' + d.cccd : '') + '</div></div><button class="btn-del" onclick="delDriver(' + d.id + ')">🗑</button>';
+    el.appendChild(div);
+  });
+}
+
+function refreshSelects(type) {
+  if (type === 'plate') {
+    document.querySelectorAll('.sel-plate').forEach(function(s) { var v = s.value; s.innerHTML = plateOptions(); s.value = v; });
+  } else {
+    document.querySelectorAll('.sel-driver').forEach(function(s) {
+      var v = s.value;
+      s.innerHTML = driverOptions();
+      s.value = v;
+      var n = s.dataset.tripId;
+      if (n) updateCallBtn(n);
+    });
+  }
+}
+
+function updateManageCounts() {
+  var xe = plates.length, lx = drivers.length, kho = warehouses.length;
+  ['cntXe','cntXe2'].forEach(function(id){ var e=document.getElementById(id); if(e) e.textContent=xe; });
+  ['cntLx','cntLx2'].forEach(function(id){ var e=document.getElementById(id); if(e) e.textContent=lx; });
+  ['cntKho','cntKho2'].forEach(function(id){ var e=document.getElementById(id); if(e) e.textContent=kho; });
+}
+
+// ===== TABS =====
+let activeTab = 'xe';
+function switchTab(tab) {
+  activeTab = tab;
+  ['xe','lx','kho'].forEach(function(t) {
+    var tb = document.getElementById('tab-'+t);
+    var pn = document.getElementById('panel-'+t);
+    if (tb) tb.className = 'tab' + (tab===t ? ' active' : '');
+    if (pn) pn.style.display = tab===t ? '' : 'none';
+  });
+}
+
+function openManage() {
+  updateManageCounts();
+  renderPlates(); renderDrivers(); renderKhoList();
+  document.getElementById('manageModal').classList.add('show');
+}
+
+// ===== TRIPS =====
+function addTrip() {
+  tripCount++;
+  var n = tripCount;
+  var div = document.createElement('div');
+  div.className = 'trip-card';
+  div.id = 'trip-' + n;
+  div.innerHTML =
+    '<div class="trip-num">🚛 Chuyến ' + n + '</div>' +
+    (n > 1 ? '<button class="trip-rm" onclick="removeTrip(' + n + ')">✕</button>' : '') +
+
+    // SỐ XE — dropdown + tự ghi
+    '<div class="fg">' +
+      '<label>🚘 Số xe *</label>' +
+      '<select class="sel-plate" id="selPlate-' + n + '" onchange="onPlateChange(' + n + ')">' +
+        plateOptions() +
+        '<option value="__custom__">✏️ Tự ghi số xe...</option>' +
+      '</select>' +
+      '<input type="text" id="plateCus-' + n + '" placeholder="Nhập biển số xe..." style="display:none;margin-top:8px;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">' +
+    '</div>' +
+
+    // LÁI XE — dropdown + tự ghi + nút gọi
+    '<div class="fg" style="margin-top:2px">' +
+      '<label>👤 Lái xe *</label>' +
+      '<div class="driver-row">' +
+        '<div class="fg" style="margin-bottom:0">' +
+          '<select class="sel-driver" id="selDriver-' + n + '" data-trip-id="' + n + '" onchange="onDriverChange(' + n + ')">' +
+            driverOptions() +
+            '<option value="__custom__">✏️ Tự ghi lái xe...</option>' +
+          '</select>' +
+        '</div>' +
+        '<button type="button" class="btn-call inactive" id="callBtn-' + n + '" onclick="callDriver(' + n + ')" title="Gọi điện lái xe">📞</button>' +
+      '</div>' +
+      '<div class="custom-box" id="driverCusBox-' + n + '">' +
+        '<div class="fg"><label>Tên tài xế</label><input type="text" id="dCusName-' + n + '" placeholder="Nguyễn Văn A"></div>' +
+        '<div class="row2">' +
+          '<div class="fg"><label>Số điện thoại</label><input type="tel" id="dCusPhone-' + n + '" placeholder="0909..." inputmode="tel" oninput="updateCallBtnCus(' + n + ')"></div>' +
+          '<div class="fg"><label>Số CCCD</label><input type="text" id="dCusCccd-' + n + '" placeholder="012345678901" inputmode="numeric" maxlength="12"></div>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+
+    // TUYẾN + GIỜ
+    '<div class="row2" style="margin-top:2px">' +
+      '<div class="fg" style="margin-bottom:0"><label>📍 Tuyến đường</label><input type="text" id="route-' + n + '" placeholder="VD: HCM → Bình Dương"></div>' +
+      '<div class="fg" style="margin-bottom:0"><label>⏰ Khung giờ bốc hàng</label><select id="time-' + n + '" style="width:100%">' + timeSlotOptions() + '</select></div>' +
+    '</div>' +
+
+    // SỐ ĐIỂM GIAO
+    '<div class="fg" style="margin-top:10px;margin-bottom:0">' +
+      '<label>📦 Số điểm giao hàng</label>' +
+      '<input type="number" id="delivery-' + n + '" placeholder="VD: 3" min="1" inputmode="numeric" style="width:140px">' +
+    '</div>' +
+
+    // GHI CHÚ
+    '<div class="fg" style="margin-top:10px;margin-bottom:0">' +
+      '<label>📝 Ghi chú chuyến</label>' +
+      '<input type="text" id="note-' + n + '" placeholder="Hàng đặc biệt, yêu cầu khác...">' +
+    '</div>';
+
+  document.getElementById('tripsList').appendChild(div);
+  renumber();
+}
+
+function onPlateChange(n) {
+  var sel = document.getElementById('selPlate-' + n);
+  var inp = document.getElementById('plateCus-' + n);
+  if (!sel || !inp) return;
+  inp.style.display = sel.value === '__custom__' ? '' : 'none';
+  if (sel.value !== '__custom__') inp.value = '';
+  else inp.focus();
+}
+
+function onDriverChange(n) {
+  var sel = document.getElementById('selDriver-' + n);
+  var box = document.getElementById('driverCusBox-' + n);
+  if (!sel || !box) return;
+  if (sel.value === '__custom__') {
+    box.classList.add('show');
+    setTimeout(function(){ var i=document.getElementById('dCusName-'+n); if(i) i.focus(); }, 80);
+  } else {
+    box.classList.remove('show');
+  }
+  updateCallBtn(n);
+}
+
+function updateCallBtnCus(n) {
+  var phone = (document.getElementById('dCusPhone-' + n) || {value:''}).value.trim();
+  var btn   = document.getElementById('callBtn-' + n);
+  if (btn) btn.className = phone ? 'btn-call active' : 'btn-call inactive';
+}
+
+function updateCallBtn(n) {
+  var sel = document.getElementById('selDriver-' + n);
+  var btn = document.getElementById('callBtn-' + n);
+  if (!sel || !btn) return;
+  if (sel.value === '__custom__') {
+    var ph = (document.getElementById('dCusPhone-' + n) || {value:''}).value.trim();
+    btn.className = ph ? 'btn-call active' : 'btn-call inactive';
+    return;
+  }
+  var id = parseInt(sel.value);
+  if (!id) { btn.className = 'btn-call inactive'; return; }
+  var d = drivers.find(function(x){ return x.id === id; });
+  btn.className = d ? 'btn-call active' : 'btn-call inactive';
+}
+
+function callDriver(n) {
+  var sel = document.getElementById('selDriver-' + n);
+  if (!sel) return;
+  if (sel.value === '__custom__') {
+    var ph = (document.getElementById('dCusPhone-' + n) || {value:''}).value.trim();
+    if (!ph) { showToast('⚠️ Chưa nhập số điện thoại'); return; }
+    window.location.href = 'tel:' + ph;
+    return;
+  }
+  var id = sel ? parseInt(sel.value) : 0;
+  var d  = drivers.find(function(x){ return x.id === id; });
+  if (!d) { showToast('⚠️ Chưa chọn lái xe'); return; }
+  window.location.href = 'tel:' + d.phone;
+}
+
+function removeTrip(n) {
+  var el = document.getElementById('trip-' + n);
+  if (el) el.remove();
+  renumber();
+}
+
+function renumber() {
+  document.querySelectorAll('.trip-card').forEach(function(c, i) {
+    var lbl = c.querySelector('.trip-num');
+    if (lbl) lbl.textContent = '🚛 Chuyến ' + (i + 1);
+  });
+}
+
+function getTrips() {
+  var trips = [];
+  document.querySelectorAll('.trip-card').forEach(function(card) {
+    var n  = card.id.replace('trip-', '');
+    var plateSelVal  = (document.getElementById('selPlate-'  + n) || {value:''}).value;
+    var driverSelVal = (document.getElementById('selDriver-' + n) || {value:''}).value;
+    var plateVal, typeVal, driverVal, phoneVal, cccdVal;
+    if (plateSelVal === '__custom__') {
+      plateVal = ((document.getElementById('plateCus-' + n) || {value:''}).value).trim().toUpperCase();
+      typeVal  = '';
+    } else {
+      var p    = plates.find(function(x){ return x.id === parseInt(plateSelVal || 0); });
+      plateVal = p ? p.plate : '';
+      typeVal  = p ? p.type  : '';
+    }
+    if (driverSelVal === '__custom__') {
+      driverVal = ((document.getElementById('dCusName-'  + n) || {value:''}).value).trim();
+      phoneVal  = ((document.getElementById('dCusPhone-' + n) || {value:''}).value).trim();
+      cccdVal   = ((document.getElementById('dCusCccd-'  + n) || {value:''}).value).trim();
+    } else {
+      var d    = drivers.find(function(x){ return x.id === parseInt(driverSelVal || 0); });
+      driverVal = d ? d.name  : '';
+      phoneVal  = d ? d.phone : '';
+      cccdVal   = d ? (d.cccd || '') : '';
+    }
+    trips.push({
+      plate:    plateVal,
+      type:     typeVal,
+      driver:   driverVal,
+      phone:    phoneVal,
+      cccd:     cccdVal,
+      route:    (document.getElementById('route-'    + n) || {value:''}).value.trim(),
+      time:     (document.getElementById('time-'     + n) || {value:''}).value,
+      delivery: (document.getElementById('delivery-' + n) || {value:''}).value.trim(),
+      note:     (document.getElementById('note-'     + n) || {value:''}).value.trim()
+    });
+  });
+  return trips;
+}
+
+// ===== PREVIEW =====
+function showPreview() {
+  var cust  = getCustomerName();
+  var date  = document.getElementById('shipDate').value;
+  var code  = document.getElementById('orderCode').value.trim();
+  var note  = document.getElementById('orderNote').value.trim();
+  var wh    = getWarehouse();
+  var trips = getTrips();
+
+  if (!cust) { showToast('⚠️ Nhập tên khách hàng'); return; }
+  if (!date) { showToast('⚠️ Chọn ngày vận chuyển'); return; }
+  if (!date) { showToast('⚠️ Chọn ngày vận chuyển'); return; }
+  for (var i = 0; i < trips.length; i++) {
+    if (!trips[i].plate)  { showToast('⚠️ Chuyến ' + (i+1) + ': Chưa chọn số xe'); return; }
+    if (!trips[i].driver) { showToast('⚠️ Chuyến ' + (i+1) + ': Chưa chọn lái xe'); return; }
+  }
+
+  var dateStr = new Date(date + 'T00:00:00').toLocaleDateString('vi-VN', {weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
+  var tripsHtml = '';
+  trips.forEach(function(t, i) {
+    tripsHtml +=
+      '<div class="preview-trip">' +
+        '<div class="preview-trip-hd">🚛 Chuyến ' + (i+1) + '</div>' +
+        '<div class="prow"><span class="plbl">🚘 Số xe:</span><strong>' + t.plate + (t.type ? ' (' + t.type + ')' : '') + '</strong></div>' +
+        (t.route ? '<div class="prow"><span class="plbl">📍 Tuyến:</span><span>' + t.route + '</span></div>' : '') +
+        (t.time  ? '<div class="prow"><span class="plbl">⏰ Giờ xuất:</span><span>' + t.time + '</span></div>' : '') +
+        '<div class="prow"><span class="plbl">👤 Lái xe:</span><span>' + t.driver + '</span></div>' +
+        '<div class="prow"><span class="plbl">📞 Điện thoại:</span><strong style="color:var(--primary)">' + t.phone + '</strong></div>' +
+        (t.cccd     ? '<div class="prow"><span class="plbl">🪪 CCCD:</span><span>' + t.cccd + '</span></div>' : '') +
+        (t.delivery ? '<div class="prow"><span class="plbl">📦 Điểm giao:</span><strong>' + t.delivery + ' điểm</strong></div>' : '') +
+        (t.note     ? '<div class="prow"><span class="plbl">📝 Ghi chú:</span><span>' + t.note + '</span></div>' : '') +
+      '</div>';
+  });
+
+  document.getElementById('previewContent').innerHTML =
+    '<div class="preview-title">🚚 THÔNG TIN XE VẬN CHUYỂN</div>' +
+    '<div class="preview-order">' +
+      '<div class="prow"><span class="plbl">👤 Khách hàng:</span><strong>' + cust + '</strong></div>' +
+      '<div class="prow"><span class="plbl">📅 Ngày:</span><span>' + dateStr + '</span></div>' +
+      (wh   ? '<div class="prow"><span class="plbl">🏭 Kho bốc:</span><strong>' + wh + '</strong></div>' : '') +
+      (code ? '<div class="prow"><span class="plbl">📦 Mã ĐH:</span><span>' + code + '</span></div>' : '') +
+      (note ? '<div class="prow"><span class="plbl">📝 Ghi chú:</span><span>' + note + '</span></div>' : '') +
+      '<div class="prow" style="margin-top:5px"><span class="plbl">🚛 Tổng xe:</span><strong>' + trips.length + ' chuyến</strong></div>' +
+    '</div>' +
+    tripsHtml +
+    '<div class="preview-foot">Vui lòng liên hệ lái xe trước khi xuất phát. Cảm ơn! 🙏</div>';
+
+  document.getElementById('previewModal').classList.add('show');
+}
+
+function copyPreview() {
+  var cust  = getCustomerName();
+  var wh    = getWarehouse();
+  var date  = document.getElementById('shipDate').value;
+  var code  = document.getElementById('orderCode').value.trim();
+  var note  = document.getElementById('orderNote').value.trim();
+  var trips = getTrips();
+  var lines = [];
+  lines.push('🚚 THÔNG TIN XE VẬN CHUYỂN');
+  lines.push('════════════════════════════');
+  lines.push('👤 Khách hàng: ' + cust);
+  if (date) lines.push('📅 Ngày: ' + new Date(date + 'T00:00:00').toLocaleDateString('vi-VN'));
+  if (wh)   lines.push('🏭 Kho bốc: ' + wh);
+  if (code) lines.push('📦 Mã ĐH: ' + code);
+  if (note) lines.push('📝 Ghi chú: ' + note);
+  lines.push('🚛 Tổng: ' + trips.length + ' chuyến');
+  lines.push('────────────────────────────');
+  trips.forEach(function(t, i) {
+    lines.push('');
+    lines.push('🚛 CHUYẾN ' + (i+1) + ':');
+    lines.push('🚘 Số xe: ' + t.plate + (t.type ? ' (' + t.type + ')' : ''));
+    if (t.route) lines.push('📍 Tuyến: ' + t.route);
+    if (t.time)  lines.push('⏰ Giờ xuất: ' + t.time);
+    lines.push('👤 Lái xe: ' + t.driver);
+    lines.push('📞 ĐT: ' + t.phone);
+    if (t.cccd)     lines.push('🪪 CCCD: ' + t.cccd);
+    if (t.delivery) lines.push('📦 Điểm giao: ' + t.delivery + ' điểm');
+    if (t.note)     lines.push('📝 ' + t.note);
+  });
+  lines.push('');
+  lines.push('────────────────────────────');
+  lines.push('Vui lòng liên hệ lái xe trước khi xuất phát. Cảm ơn! 🙏');
+
+  navigator.clipboard.writeText(lines.join('\n')).then(function(){ showToast('✅ Đã copy! Dán vào Zalo/tin nhắn'); }).catch(function(){ showToast('❌ Không copy được, chụp màn hình'); });
+}
+
+// ===== SHEET =====
+function openJournal() {
+  var url = localStorage.getItem('journalUrl') || '';
+  if (url) { window.open(url, '_blank'); }
+  else { showToast('⚠️ Chưa lưu link Nhật ký. Mở file nhat-ky-dieu-xe.html rồi quay lại.'); }
+}
+
+function saveSheetUrl() {
+  var url = document.getElementById('sheetUrl').value.trim();
+  if (!url) { showToast('⚠️ Nhập URL'); return; }
+  sheetUrl = url;
+  localStorage.setItem('sheetUrl', url);
+  setSheetStatus(true);
+  loadFromSheet(true);
+}
+
+function setSheetStatus(ok) {
+  var bar = document.getElementById('sheetStatus');
+  bar.className = 'sheet-status ' + (ok ? 'ok' : 'no');
+  bar.innerHTML = '<span class="sdot"></span><span>' + (ok ? 'Đã kết nối Google Sheet ✓' : 'Chưa cài đặt Google Sheet URL') + '</span>';
+}
+
+async function saveToSheet() {
+  if (!sheetUrl) { showToast('⚠️ Chưa cài Google Sheet URL'); document.getElementById('sheetCard').scrollIntoView({behavior:'smooth'}); return; }
+  var cust  = getCustomerName();
+  var wh    = getWarehouse();
+  var date  = document.getElementById('shipDate').value;
+  if (!cust) { showToast('⚠️ Nhập tên khách hàng'); return; }
+  if (!date) { showToast('⚠️ Chọn ngày vận chuyển'); return; }
+  var trips = getTrips();
+  for (var i = 0; i < trips.length; i++) {
+    if (!trips[i].plate || !trips[i].driver) { showToast('⚠️ Chuyến ' + (i+1) + ': Chưa chọn đủ'); return; }
+  }
+  showToast('⏳ Đang lưu...');
+  try {
+    await fetch(sheetUrl, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ customerName:cust, warehouse:wh, shipDate:date, orderCode: document.getElementById('orderCode').value.trim(), orderNote: document.getElementById('orderNote').value.trim(), trips:trips }) });
+    showToast('✅ Đã lưu vào Google Sheet!');
+  } catch(e) { showToast('❌ Lỗi kết nối'); }
+}
+
+function toggleGuide() { var g=document.getElementById('guide'); g.style.display=g.style.display==='none'?'block':'none'; }
+function copyScript() { navigator.clipboard.writeText(document.getElementById('scriptCode').value).then(function(){ showToast('✅ Đã copy code!'); }); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function handleOv(e,id) { if (e.target===e.currentTarget) closeModal(id); }
 
 function showToast(msg) {
   var t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   clearTimeout(t._t); t._t = setTimeout(function(){ t.classList.remove('show'); }, 3000);
 }
+
+document.addEventListener('input', function(e) {
+  if (e.target.id === 'newPlate') e.target.value = e.target.value.toUpperCase();
+});
 </script>
 </body>
 </html>
