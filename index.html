@@ -139,11 +139,11 @@
   <!-- FILTER -->
   <div class="filter-bar">
     <div class="filter-group">
-      <label>Từ ngày</label>
+      <label>Ngày VC từ</label>
       <input type="date" id="fFrom">
     </div>
     <div class="filter-group">
-      <label>Đến ngày</label>
+      <label>Ngày VC đến</label>
       <input type="date" id="fTo">
     </div>
     <div class="filter-group">
@@ -183,9 +183,9 @@
             <th onclick="sortBy('ngaytao')">Ngày tạo<span class="sort-icon">↕</span></th>
             <th onclick="sortBy('khach')">Khách hàng<span class="sort-icon">↕</span></th>
             <th onclick="sortBy('khoboc')">Kho bốc<span class="sort-icon">↕</span></th>
+            <th onclick="sortBy('ngayvc')" style="background:#fff8e1">Ngày VC<span class="sort-icon">↕</span></th>
             <th>Chuyến</th>
             <th onclick="sortBy('soxe')">Số xe<span class="sort-icon">↕</span></th>
-            <th>Loại xe</th>
             <th>Tuyến</th>
             <th onclick="sortBy('laixe')">Lái xe<span class="sort-icon">↕</span></th>
             <th>SĐT</th>
@@ -196,7 +196,7 @@
           </tr>
         </thead>
         <tbody id="tableBody">
-          <tr><td colspan="14"><div class="empty-state"><div class="ico">📊</div><p>Nhập Apps Script URL ở trên để tải dữ liệu</p></div></td></tr>
+          <tr><td colspan="15"><div class="empty-state"><div class="ico">📊</div><p>Nhập Apps Script URL ở trên để tải dữ liệu</p></div></td></tr>
         </tbody>
       </table>
     </div>
@@ -300,24 +300,21 @@ function applyFilter() {
   var fKho    = document.getElementById('fKho').value;
 
   var filtered = allRows.filter(function(r) {
-    var dateStr = String(r[0]||'');
-    // parse dd/mm/yyyy from locale string
-    var parts = dateStr.match(/(\d+)\/(\d+)\/(\d+)/);
-    if (parts) {
-      var d = new Date(parts[3]+'-'+parts[2].padStart(2,'0')+'-'+parts[1].padStart(2,'0'));
-      var ds = d.toISOString().split('T')[0];
-      if (fFrom && ds < fFrom) return false;
-      if (fTo   && ds > fTo)   return false;
+    // Lọc theo Ngay vc (cột 4) — định dạng yyyy-mm-dd
+    var ngayVc = String(r[4]||'');
+    if (ngayVc) {
+      if (fFrom && ngayVc < fFrom) return false;
+      if (fTo   && ngayVc > fTo)   return false;
     }
     if (fKhach  && !String(r[2]||'').toLowerCase().includes(fKhach))  return false;
-    if (fXe     && !String(r[5]||'').toLowerCase().includes(fXe))     return false;
-    if (fDriver && !String(r[8]||'').toLowerCase().includes(fDriver)) return false;
+    if (fXe     && !String(r[6]||'').toLowerCase().includes(fXe))     return false;
+    if (fDriver && !String(r[9]||'').toLowerCase().includes(fDriver)) return false;
     if (fKho    && String(r[3]||'') !== fKho) return false;
     return true;
   });
 
   filtered.sort(function(a, b) {
-    var idx = {ngaytao:0, khach:2, khoboc:3, soxe:5, laixe:8}[sortKey] || 0;
+    var idx = {ngaytao:0, khach:2, khoboc:3, ngayvc:4, soxe:6, laixe:9}[sortKey] || 0;
     var va = String(a[idx]||''), vb = String(b[idx]||'');
     return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
   });
@@ -349,7 +346,7 @@ function sortBy(key) {
 function renderTable(rows) {
   var tb = document.getElementById('tableBody');
   if (!rows.length) {
-    tb.innerHTML = '<tr><td colspan="14"><div class="empty-state"><div class="ico">🔍</div><p>Không có dữ liệu khớp điều kiện lọc</p></div></td></tr>';
+    tb.innerHTML = '<tr><td colspan="15"><div class="empty-state"><div class="ico">🔍</div><p>Không có dữ liệu khớp điều kiện lọc</p></div></td></tr>';
     return;
   }
   var html = '';
@@ -359,16 +356,16 @@ function renderTable(rows) {
     html += '<td style="font-size:11px;color:var(--muted)">' + (r[0]||'') + '</td>';
     html += '<td><strong>' + (r[2]||'') + '</strong></td>';
     html += '<td><span class="badge badge-blue">' + (r[3]||'-') + '</span></td>';
-    html += '<td style="text-align:center"><span class="badge badge-green">' + (r[4]||'') + '</span></td>';
-    html += '<td><strong style="color:var(--primary)">' + (r[5]||'') + '</strong>' + (r[6] ? ' <span style="color:var(--muted);font-size:11px">(' + r[6] + ')</span>' : '') + '</td>';
-    html += '<td style="color:var(--muted)">' + (r[6]||'') + '</td>';
-    html += '<td>' + (r[7]||'') + '</td>';
+    html += '<td style="font-weight:600;color:var(--primary)">' + (r[4]||'') + '</td>';
+    html += '<td style="text-align:center"><span class="badge badge-green">' + (r[5]||'') + '</span></td>';
+    html += '<td><strong style="color:var(--primary)">' + (r[6]||'') + '</strong>' + (r[7] ? ' <span style="color:var(--muted);font-size:11px">(' + r[7] + ')</span>' : '') + '</td>';
     html += '<td>' + (r[8]||'') + '</td>';
-    html += '<td><a href="tel:' + (r[9]||'') + '" style="color:var(--primary);text-decoration:none;font-weight:600">' + (r[9]||'') + '</a></td>';
-    html += '<td style="font-size:11px;color:var(--muted)">' + (r[10]||'') + '</td>';
-    html += '<td style="text-align:center">' + (r[11] ? '<strong>' + r[11] + '</strong>' : '-') + '</td>';
-    html += '<td>' + (r[12]||'') + '</td>';
-    html += '<td style="color:var(--muted)">' + (r[13]||'') + '</td>';
+    html += '<td>' + (r[9]||'') + '</td>';
+    html += '<td><a href="tel:' + (r[10]||'') + '" style="color:var(--primary);text-decoration:none;font-weight:600">' + (r[10]||'') + '</a></td>';
+    html += '<td style="font-size:11px;color:var(--muted)">' + (r[11]||'') + '</td>';
+    html += '<td style="text-align:center">' + (r[12] ? '<strong>' + r[12] + '</strong>' : '-') + '</td>';
+    html += '<td>' + (r[13]||'') + '</td>';
+    html += '<td style="color:var(--muted)">' + (r[14]||'') + '</td>';
     html += '</tr>';
   });
   tb.innerHTML = html;
@@ -377,9 +374,9 @@ function renderTable(rows) {
 // ── Stats ──
 function updateStats() {
   var today = new Date().toLocaleDateString('vi-VN');
-  var todayRows = allRows.filter(function(r){ return String(r[0]||'').startsWith(today.split(' ')[0])||String(r[0]||'').includes(today); });
-  var plates  = new Set(allRows.map(function(r){return r[5]||'';}));
-  var drivers = new Set(allRows.map(function(r){return r[8]||'';}));
+  var todayRows = allRows.filter(function(r){ return String(r[4]||'') === new Date().toISOString().split('T')[0]; });
+  var plates  = new Set(allRows.map(function(r){return r[6]||'';}));
+  var drivers = new Set(allRows.map(function(r){return r[9]||'';}));
   document.getElementById('statTotal').textContent  = allRows.length;
   document.getElementById('statToday').textContent  = todayRows.length;
   document.getElementById('statXe').textContent     = plates.size;
